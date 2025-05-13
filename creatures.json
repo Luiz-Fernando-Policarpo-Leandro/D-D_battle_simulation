@@ -1,0 +1,85 @@
+{
+    "Giant ape": {
+      "name": "Giant Ape",
+      "_type": "Beast",
+      "size": "Huge",
+      "alignment": "Unaligned",
+      "ac": 12,
+      "ac_type": "natural armor",
+      "pv": 157,
+      "attributes": {
+        "STR": 23,
+        "DEX": 14,
+        "CON": 18,
+        "INT": 7,
+        "WIS": 12,
+        "CHA": 7
+      },
+      "skills": {
+        "Athletics": 9,
+        "Perception": 4
+      },
+      "resistance": [],
+      "vulnerability": [],
+      "immunity": [],
+      "languages": [],
+      "cd": 7,
+      "especial": null,
+      "spell": [],
+      "actions": [
+        {
+          "name": "Fist",
+          "type_action": ["action", "Melee Weapon Attack"],
+          "damage": [1, "3d10+6", "bludgeoning"],
+          "target": ["one target", "3 m"],
+          "bonus": 9
+        },
+        {
+          "name": "Rock",
+          "type_action": ["action", "Ranged Weapon Attack"],
+          "damage": [1, "7d6+6", "bludgeoning"],
+          "target": ["one target", "15/30 m"]
+        },
+        {
+          "name": "Multiattack",
+          "multiAtk": ["Fist", "Fist"]
+        }
+      ]
+    },
+  
+    "Commoner": {
+      "name": "Commoner",
+      "_type": "Humanoid",
+      "size": "Medium",
+      "alignment": "Any alignment",
+      "ac": 10,
+      "ac_type": "natural armor",
+      "pv": 4,
+      "attributes": {
+        "STR": 10,
+        "DEX": 10,
+        "CON": 10,
+        "INT": 10,
+        "WIS": 10,
+        "CHA": 10
+      },
+      "skills": {},
+      "resistance": [],
+      "vulnerability": [],
+      "immunity": [],
+      "languages": [],
+      "cd": 0,
+      "especial": null,
+      "spell": [],
+      "actions": [
+        {
+          "name": "Club",
+          "type_action": ["action", "Melee Weapon Attack"],
+          "damage": [1, "1d4", "bludgeoning"],
+          "target": ["one target", "1.5 m"],
+          "bonus": 2
+        }
+      ]
+    }
+  }
+  
