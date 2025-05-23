@@ -1,4 +1,5 @@
 from dice import abilityModifier, roll_dice as dice
+import random
 
 class Battle:
     def __init__(self, _creatures):
@@ -35,6 +36,7 @@ class Battle:
 
     def turn(self, creature):
         if creature.HP > 0:
+                random
             pass
     
     def start(self):

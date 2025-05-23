@@ -38,7 +38,8 @@
           "name": "Rock",
           "type_action": ["action", "Ranged Weapon Attack"],
           "damage": [1, "7d6+6", "bludgeoning"],
-          "target": ["one target", "15/30 m"]
+          "target": ["one target", "15/30 m"],
+          "bonus": 9
         },
         {
           "name": "Multiattack",

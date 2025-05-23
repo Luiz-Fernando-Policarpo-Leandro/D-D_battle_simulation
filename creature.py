@@ -11,20 +11,28 @@ class Actions:
         self.cd = data.get("cd", 0)
         self.parent = parent  # Referência à criatura dona da ação
     
-    def attack(self):
+    def attack(self,cd):
         if self.multiAtk:
             results = []
             sum_result = 0
             for atk_name in self.multiAtk:
                 for action in self.parent.actions:
                     if action.name == atk_name:
-                        atk = action.attack()
+                        atk = action.attack(cd)
                         results.append((atk_name, atk))
-                        sum_result += atk[1]
+                        sum_result += atk[1] if isinstance(atk, int) else 0
                         break
             return results, sum_result
         elif self.damage:
-            return dice(self.damage[1])
+            resroll = checkTest(cd, self.bonus)[1]
+            damage = self.damage[1]
+            if resroll in ['critical save', 'saved']:
+                damage = damage if resroll == 'saved' else (str(int(damage[0]) * 2)  + damage[1:])
+                return damage, resroll
+            return "0d0", resroll
+                
+
+
 
 
 class Creature:
@@ -57,4 +65,3 @@ class Creature:
         if actions:
             for act in actions:
                 self.actions.append(Actions(act, parent=self))
-

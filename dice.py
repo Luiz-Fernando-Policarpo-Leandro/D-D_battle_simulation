@@ -37,7 +37,7 @@ def roll_dice(dice_str):
         total = sum(result) + sum_dice
 
         # return [...dices, sum(total)]
-        return result, (total if total > 1 else 1)
+        return result, total if total > 1 else 1
     
     except Exception as error:
         return f"Erro no '{dice_str}': {error}"
@@ -59,16 +59,12 @@ def checkTest(cd, bonus, roll_with=''):
     
     final = final_dice_result + bonus
 
-    if (final) > cd:
-        result_test = "passou" if final_dice_result != 20 else "critical save"
+    if (final) > cd or final_dice_result == 20:
+        result_test = "saved" if final_dice_result != 20 else "critical save"
     else:
         result_test = "failure" if final_dice_result != 1 else "critical failure"
     
-    return [final_dice_result, result_test] , final
+    return final_dice_result, result_test , final
 
 def abilityModifier(mod):
     return ((mod-10) // 2)
-
-
-
-

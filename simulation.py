@@ -2,7 +2,7 @@
 import json
 import random
 from creature import Creature
-from battle import Battle
+# from battle import Battle
 
 _names = [
     "José", "Maria", "João", "Ana", "Pedro", "Lucas", "Carlos", "Fernanda", "Paula", "Rafael",
@@ -34,6 +34,5 @@ for c in range(100):
 
     commners.append(Creature(**new_commoner))
 
-
-simulation = Battle([commners,[giant_ape]])
-simulation.start
+#simulation = Battle([commners,[giant_ape]])
+#simulation.start
