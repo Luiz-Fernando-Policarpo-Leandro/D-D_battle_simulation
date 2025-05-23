@@ -2,6 +2,7 @@
 import json
 import random
 from creature import Creature
+from battle import Battle
 
 _names = [
     "José", "Maria", "João", "Ana", "Pedro", "Lucas", "Carlos", "Fernanda", "Paula", "Rafael",
@@ -32,3 +33,7 @@ for c in range(100):
     new_commoner["name"] = f"Commoner n{c+1} {random.choice(_names)} {random.choice(_lastnames)}"
 
     commners.append(Creature(**new_commoner))
+
+
+simulation = Battle([commners,[giant_ape]])
+simulation.start

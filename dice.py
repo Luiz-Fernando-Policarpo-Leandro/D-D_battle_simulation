@@ -66,9 +66,8 @@ def checkTest(cd, bonus, roll_with=''):
     
     return [final_dice_result, result_test] , final
 
-def iniciative(m):
-    pass
-
+def abilityModifier(mod):
+    return ((mod-10) // 2)
 
 
 
