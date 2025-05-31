@@ -1,4 +1,4 @@
-from dice import abilityModifier, roll_dice as dice
+from dice import roll_dice as dice
 import random
 
 class Battle:
@@ -11,32 +11,38 @@ class Battle:
         self.creatures.sort(key=lambda creatures: creatures.iniciative, reverse = True)
 
         ##  start
-        self.start()
-
-    def iniciative_roll(self,dex):
-        creatureDexMod = abilityModifier(dex)
-        return dice(f"1d20+{creatureDexMod}")[1]
+        #self.start()
 
 
     def teamsform(self, _creatures):
         result = []
         times = _creatures
         for index, time in enumerate(times):
-            nametime = chr(65 + index) if (len(time) > 1) else 'solo'
-            timeList = {"name": nametime, "creatures": []}
+            nameteam = chr(65 + index)
+            timeList = {"name": nameteam, "creatures": []}
             for creature in time:
-                creature.time = nametime # return char like 'a' to differentiate the teams
+                creature.team = nameteam  # return char like 'a' to differentiate the teams
                 creature.HP = creature.PV
-                creature.iniciative = self.iniciative_roll(creature.attributes["DEX"]) ## iniciative init
+                creature.iniciative = dice(f"1d20+{creature.attribute['dex']['modifier']}")[1] ## iniciative init
                 timeList["creatures"].append(creature.name)
             result.append(timeList)
 
         self.teams = result
-        self.creatures = sum(times, [])
+        self.creatures = [c for team in times for c in team]
+
+
+    def choisetarget(self, creatureteam):
+        teamchosen = [team['name'] for team in self.teams if team['name'] != creatureteam.team]
+        creatures = [(c.name, c.team)  for c in self.creatures if c.team in teamchosen]
+        target = random.choice(creatures)
+
+        return target 
+
+
 
     def turn(self, creature):
         if creature.HP > 0:
-                random
+            #chosetarget = random
             pass
     
     def start(self):

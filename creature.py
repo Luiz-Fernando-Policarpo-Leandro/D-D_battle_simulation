@@ -9,7 +9,7 @@ class Actions:
         self.target = data.get("target", [])
         self.bonus = data.get("bonus", 0)
         self.cd = data.get("cd", 0)
-        self.parent = parent  # Referência à criatura dona da ação
+        self.parent = parent  # reference of the owner creature
     
     def attack(self,cd):
         if self.multiAtk:
@@ -31,8 +31,15 @@ class Actions:
                 return damage, resroll
             return "0d0", resroll
                 
-
-
+def attributesForm(attrs):
+    def form(score):
+        return {"value": score , "modifier":((score-10) // 2)}
+    
+    result = {}
+    for name, value in attrs.items():
+        result[name.lower()] = form(value)
+    return result
+    
 
 
 class Creature:
@@ -48,7 +55,7 @@ class Creature:
         self.AC = ac
         self.AcType = ac_type
         self.PV = pv
-        self.attributes = attributes
+        self.attribute = attributesForm(attributes)
         self.skills = skills
 
         self.resistance = resistance

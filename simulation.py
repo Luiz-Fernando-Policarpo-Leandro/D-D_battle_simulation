@@ -2,7 +2,7 @@
 import json
 import random
 from creature import Creature
-# from battle import Battle
+from battle import Battle
 
 _names = [
     "José", "Maria", "João", "Ana", "Pedro", "Lucas", "Carlos", "Fernanda", "Paula", "Rafael",
@@ -25,6 +25,8 @@ giant_ape_data = baseData["Giant ape"]
 commoner_data = baseData["Commoner"]
 
 giant_ape = Creature(**giant_ape_data)
+giant_apeb = Creature(**giant_ape_data)
+giant_apec = Creature(**giant_ape_data)
 commners = []
 
 
@@ -34,5 +36,5 @@ for c in range(100):
 
     commners.append(Creature(**new_commoner))
 
-#simulation = Battle([commners,[giant_ape]])
-#simulation.start
+simulation = Battle([commners,[giant_ape, giant_apeb],[giant_apec]])
+simulation.start
