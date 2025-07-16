@@ -11,7 +11,8 @@ class Actions:
         self.cd = data.get("cd", 0)
         self.parent = parent  # reference of the owner creature
     
-    def attack(self,cd):
+    def attack(self,creature):
+        cd = creature.AC
         if self.multiAtk:
             results = []
             sum_result = 0
@@ -27,8 +28,9 @@ class Actions:
             resroll = checkTest(cd, self.bonus)[1]
             damage = self.damage[1]
             if resroll in ['critical save', 'saved']:
-                damage = damage if resroll == 'saved' else (str(int(damage[0]) * 2)  + damage[1:])
-                return damage, resroll
+                damage = dice(damage if resroll == 'saved' else (str(int(damage[0]) * 2)  + damage[1:]))
+                # return ((...dices, sum[dices]), rsultu)
+                return damage, resroll 
             return "0d0", resroll
                 
 def attributesForm(attrs):
@@ -43,7 +45,7 @@ def attributesForm(attrs):
 
 
 class Creature:
-    def __init__(self, name, _type, size, alignment, ac, ac_type, pv,
+    def __init__(self, name, _type, size, alignment, ac, ac_type, HP,
                  attributes, skills, resistance, vulnerability, immunity,
                  languages, cd, especial, spell, actions):
 
@@ -54,8 +56,15 @@ class Creature:
 
         self.AC = ac
         self.AcType = ac_type
-        self.PV = pv
-        self.attribute = attributesForm(attributes)
+        
+        self.MAXIMUM_HP = HP # maximum hit points
+        self.HP = HP #hit points
+        self.TEMPORARY_HP = 0 # temporary hit points
+        self.death_checks = {'save': 0, 'failed': 0}
+
+
+        # creature.attribute['dex']['modifier'] || ['value']
+        self.attribute = attributesForm(attributes) 
         self.skills = skills
 
         self.resistance = resistance
@@ -72,3 +81,51 @@ class Creature:
         if actions:
             for act in actions:
                 self.actions.append(Actions(act, parent=self))
+
+    def iniciative_roll(self):
+	    return dice(f"1d20 + {self.attribute["dex"]["modifier"]}")[1]
+
+    def healing(self,cure):
+        # if the creature is prone
+        if self.HP < 0:
+            self.HP = cure
+            self.deathCheck("alive")
+        # checks if the cure is higher more than the maximum HP
+        if (self.HP + cure) > self.MAXIMUM_HP:
+            self.HP = self.MAXIMUM_HP
+        
+        
+    def is_alive(self):
+        return self.HP > 0
+
+    def deathCheck(self, result_check = 0):
+        if result_check > 0:
+            self.death_checks['save'] += 1
+        if result_check < 0:
+            self.death_checks['failed'] += 1
+
+
+    def takesDamage(self, damageHit):
+        if damageHit < 0: # Certifique-se de que o dano é positivo
+            damageHit = 0
+
+        # Primeiro, aplique o dano ao HP Temporário
+        if self.TEMPORARY_HP > 0:
+            if damageHit <= self.TEMPORARY_HP:
+                self.TEMPORARY_HP -= damageHit
+                damageHit = 0 # Todo o dano foi absorvido pelo HP temporário
+            else:
+                damageHit -= self.TEMPORARY_HP
+                self.TEMPORARY_HP = 0
+
+        # Em seguida, aplique o dano restante ao HP real
+        if damageHit > 0:
+            self.HP -= damageHit
+
+        # Verifique se a criatura ainda está viva e atualize o status de morte
+        if self.HP <= 0:
+            self.HP = 0 # Garante que o HP não seja negativo
+            if self.is_alive(): # Se era viva e agora não é mais
+                self.is_alive = False # Você pode adicionar um atributo is_alive no __init__
+                self.deathCheck(-1) # Ou chame isso apenas uma vez ao morrer
+                print(f"{self.name} foi derrotado!")

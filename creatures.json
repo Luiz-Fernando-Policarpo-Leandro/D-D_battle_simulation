@@ -6,7 +6,7 @@
       "alignment": "Unaligned",
       "ac": 12,
       "ac_type": "natural armor",
-      "pv": 157,
+      "HP": 157,
       "attributes": {
         "STR": 23,
         "DEX": 14,
@@ -55,7 +55,7 @@
       "alignment": "Any alignment",
       "ac": 10,
       "ac_type": "natural armor",
-      "pv": 4,
+      "HP": 4,
       "attributes": {
         "STR": 10,
         "DEX": 10,
