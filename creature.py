@@ -33,7 +33,6 @@ class Actions:
             if resroll not in ['critical save', 'saved']:
                 return "0d0", resroll
 
-            # garante multiplicação correta mesmo com "10d8"
             qtd, rest = damage.split("d", 1)
             damage = damage if resroll == 'saved' else f"{int(qtd) * 2}d{rest}"
 
