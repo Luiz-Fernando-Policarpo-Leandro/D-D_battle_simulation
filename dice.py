@@ -67,3 +67,5 @@ def checkTest(cd, bonus, roll_with=''):
     return final_dice_result, result_test , final
 
 
+if __name__ == "__main__":
+    pass

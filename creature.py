@@ -11,7 +11,7 @@ class Actions:
         self.cd = data.get("cd", 0)
         self.parent = parent  # reference of the owner creature
     
-    def attack(self,creature):
+    def attack(self, creature):
         cd = creature.AC
         if self.multiAtk:
             results = []
@@ -19,19 +19,28 @@ class Actions:
             for atk_name in self.multiAtk:
                 for action in self.parent.actions:
                     if action.name == atk_name:
-                        atk = action.attack(cd)
+                        atk = action.attack(creature)
                         results.append((atk_name, atk))
-                        sum_result += atk[1] if isinstance(atk, int) else 0
+                        if isinstance(atk, tuple):
+                            sum_result += atk[1]
                         break
             return results, sum_result
+
         elif self.damage:
             resroll = checkTest(cd, self.bonus)[1]
             damage = self.damage[1]
-            if resroll in ['critical save', 'saved']:
-                damage = dice(damage if resroll == 'saved' else (str(int(damage[0]) * 2)  + damage[1:]))
-                # return ((...dices, sum[dices]), rsultu)
-                return damage, resroll 
-            return "0d0", resroll
+
+            if resroll not in ['critical save', 'saved']:
+                return "0d0", resroll
+
+            # garante multiplicação correta mesmo com "10d8"
+            qtd, rest = damage.split("d", 1)
+            damage = damage if resroll == 'saved' else f"{int(qtd) * 2}d{rest}"
+
+            damage = dice(damage)
+            return damage, resroll
+
+
                 
 def attributesForm(attrs):
     def form(score):
@@ -60,7 +69,8 @@ class Creature:
         self.MAXIMUM_HP = HP # maximum hit points
         self.HP = HP #hit points
         self.TEMPORARY_HP = 0 # temporary hit points
-        self.death_checks = {'save': 0, 'failed': 0}
+        self.death_checks = {'saved': 0, 'failed': 0}
+        self.status_creature = "alive"
 
 
         # creature.attribute['dex']['modifier'] || ['value']
@@ -83,49 +93,97 @@ class Creature:
                 self.actions.append(Actions(act, parent=self))
 
     def iniciative_roll(self):
-	    return dice(f"1d20 + {self.attribute["dex"]["modifier"]}")[1]
+	    return dice(f"1d20 + {self.attribute['dex']['modifier']}")[1]
 
-    def healing(self,cure):
-        # if the creature is prone
-        if self.HP < 0:
-            self.HP = cure
-            self.deathCheck("alive")
-        # checks if the cure is higher more than the maximum HP
-        if (self.HP + cure) > self.MAXIMUM_HP:
-            self.HP = self.MAXIMUM_HP
-        
-        
+
+
     def is_alive(self):
-        return self.HP > 0
+        return self.HP > 0 and self.status_creature != "dead"
 
-    def deathCheck(self, result_check = 0):
-        if result_check > 0:
-            self.death_checks['save'] += 1
-        if result_check < 0:
+    def deathCheck(self, result_check = "saved", damage = 0):
+        """
+        This method make the death checks
+        - check if stable or takes damage
+        - check if damage is higher than MAX_HITPOINTS
+        - check if result_check is a failed or a save
+        - if failed acressent 1 in death
+        - if saved acressent 1 in save
+        - if death_checks is higher morer 2, so status is updated
+        """
+
+        if self.status_creature == "stable" and not damage:
+            return
+
+        if damage >= self.MAXIMUM_HP:
+            self.status_creature = "dead"
+            return
+
+        if result_check == "failed" or damage:
             self.death_checks['failed'] += 1
+            if self.death_checks['failed'] > 2:
+                self.status_creature = "dead"
+            return
+
+        self.death_checks['saved'] += 1
+
+        if self.death_checks['saved'] > 2:
+            self.status_creature = "stable"
+
+
+
+    def healing(self,cure = 1):
+
+        """
+        this method cure the creature
+        - checks if creature HITPOINTS IS higher more MAX_HITPOINTS
+        """
+        if self.HP == self.MAXIMUM_HP:
+            return
+
+        if not self.is_alive():  # estava caída
+            self.HP = cure
+            self.death_checks = {'saved': 0, 'failed': 0}
+            self.status_creature = "alive"
+        else:
+            self.HP = min(self.HP + cure, self.MAXIMUM_HP)
+
+
 
 
     def takesDamage(self, damageHit):
-        if damageHit < 0: # Certifique-se de que o dano é positivo
-            damageHit = 0
+        """
+        This method applies damage and reduces it if necessary:
+        - first check if alive, else make the deathchecks
+        - return if there's no damage
+        - reduce damage using TEMPORARY_HP if available
+        - reduce actual HP
+        - set status to 'unconscious' if HP drops to 0
+        """
+        if self.is_alive():
 
-        # Primeiro, aplique o dano ao HP Temporário
-        if self.TEMPORARY_HP > 0:
-            if damageHit <= self.TEMPORARY_HP:
-                self.TEMPORARY_HP -= damageHit
-                damageHit = 0 # Todo o dano foi absorvido pelo HP temporário
-            else:
+            if damageHit < 1:
+                damageHit = 0
+                return
+
+            if self.TEMPORARY_HP > 0:
+                if damageHit <= self.TEMPORARY_HP:
+                    self.TEMPORARY_HP -= damageHit
+                    return
                 damageHit -= self.TEMPORARY_HP
                 self.TEMPORARY_HP = 0
 
-        # Em seguida, aplique o dano restante ao HP real
-        if damageHit > 0:
-            self.HP -= damageHit
 
-        # Verifique se a criatura ainda está viva e atualize o status de morte
-        if self.HP <= 0:
-            self.HP = 0 # Garante que o HP não seja negativo
-            if self.is_alive(): # Se era viva e agora não é mais
-                self.is_alive = False # Você pode adicionar um atributo is_alive no __init__
-                self.deathCheck(-1) # Ou chame isso apenas uma vez ao morrer
-                print(f"{self.name} foi derrotado!")
+            if damageHit > 0:
+                self.HP -= damageHit
+                self.HP = max(self.HP, 0)
+
+            if self.HP <= 0 and self.status_creature == "alive":
+                self.status_creature = "unconscious"
+
+        else:
+            self.HP = 0
+            self.deathCheck("failed",damageHit)
+
+
+if __name__ == "__main__":
+    pass
